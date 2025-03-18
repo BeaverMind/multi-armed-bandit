@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+
 from agents import EpsilonGreedyAgent, SoftmaxAgent, UCBAgent, ThompsonSamplingAgent
 
 class MultiArmedBandit:
@@ -28,6 +30,14 @@ def run_simulation(n_steps=1000, n_bandits=1000):
         'Thompson Sampling': np.zeros(n_steps)
     }
     
+    # Track runtime for each policy
+    runtime = {
+        'Epsilon-Greedy': 0,
+        'Softmax': 0,
+        'UCB': 0,
+        'Thompson Sampling': 0
+    }
+    
     for i in range(n_bandits):
         # Create bandit problem
         bandit = MultiArmedBandit()
@@ -36,19 +46,25 @@ def run_simulation(n_steps=1000, n_bandits=1000):
         # Create agents with different strategies
         agents = {
             'Epsilon-Greedy': EpsilonGreedyAgent(bandit.k, epsilon=0.1),
-            'Softmax': SoftmaxAgent(bandit.k, temperature=0.5),
+            'Softmax': SoftmaxAgent(bandit.k, temperature=0.1),
             'UCB': UCBAgent(bandit.k, c=2.0),
             'Thompson Sampling': ThompsonSamplingAgent(bandit.k)
         }
         
         for t in range(n_steps):
             for name, agent in agents.items():
+                # Measure time for this policy's decision and update
+                start_time = time.time()
+                
                 # Select arm and get reward
                 arm = agent.select_arm()
                 reward = bandit.pull(arm)
                 
                 # Update agent
                 agent.update(arm, reward)
+                
+                # Record runtime
+                runtime[name] += time.time() - start_time
                 
                 # Record results
                 rewards[name][t] += reward
@@ -60,12 +76,12 @@ def run_simulation(n_steps=1000, n_bandits=1000):
         rewards[name] /= n_bandits
         optimal_actions[name] /= n_bandits
     
-    return rewards, optimal_actions
+    return rewards, optimal_actions, runtime
 
-def plot_results(rewards, optimal_actions):
-    plt.figure(figsize=(16, 6))
+def plot_results(rewards, optimal_actions, runtime):
+    plt.figure(figsize=(16, 10))
     
-    plt.subplot(1, 2, 1)
+    plt.subplot(2, 2, 1)
     for name, reward in rewards.items():
         plt.plot(reward, label=name)
     plt.xlabel('Steps')
@@ -73,7 +89,7 @@ def plot_results(rewards, optimal_actions):
     plt.title('Average Reward over Time')
     plt.legend()
     
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     for name, opt_action in optimal_actions.items():
         plt.plot(opt_action, label=name)
     plt.xlabel('Steps')
@@ -81,10 +97,31 @@ def plot_results(rewards, optimal_actions):
     plt.title('Percentage of Optimal Actions over Time')
     plt.legend()
     
+    if runtime:
+        plt.subplot(2, 2, 3)
+        plt.bar(runtime.keys(), runtime.values())
+        plt.ylabel('Total runtime (seconds)')
+        plt.title('Runtime Comparison')
+        plt.xticks(rotation=45)
+        
+        # Calculate relative performance
+        fastest = min(runtime.values())
+        relative_speed = {name: time/fastest for name, time in runtime.items()}
+        
+        plt.subplot(2, 2, 4)
+        plt.bar(relative_speed.keys(), relative_speed.values())
+        plt.ylabel('Relative runtime (fastest = 1.0)')
+        plt.title('Relative Runtime Performance')
+        plt.xticks(rotation=45)
+        
+        for i, (name, value) in enumerate(relative_speed.items()):
+            plt.text(i, value + 0.05, f"{value:.2f}x", ha='center')
+    
+    
     plt.savefig(f'results.pdf', bbox_inches='tight')
     plt.tight_layout()
     plt.show(block=True)
 
 # Run and plot
-rewards, optimal_actions = run_simulation()
-plot_results(rewards, optimal_actions)
+rewards, optimal_actions, runtime = run_simulation()
+plot_results(rewards, optimal_actions, runtime)
