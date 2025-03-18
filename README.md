@@ -14,3 +14,11 @@ You come across this problem everyday, whenever you are faced with choices. How 
 # Implementation
 
 This repo implements a simple bandit problem with the epsilon-greedy approach, Softmax/Boltzmann exploration, Upper Confidence Bound (UCB1), and Thompson Sampling.
+
+All you need is numpy and matplotlib, then you could run:
+
+```
+python main.py
+```
+
+which should give you a file `results.pdf` that shows the expected rewards and the run time for different strategies.
