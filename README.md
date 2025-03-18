@@ -9,7 +9,4 @@ According to [wikipedia](https://en.wikipedia.org/wiki/Multi-armed_bandit):
 
 You come across this problem everyday, whenever you are faced with choices. How do you pick the best strategy to determine, from a set of restaurants, which ones will be your favourite to go for maximized happiness? This exemplifies the exploration-exploitation tradeoff. This problem is also faced in machine learning. Additionally, multi-armed bandits have been used to model problems such as managing research projects in a large organization, like a science foundation or a pharmaceutical company (wikipedia). Here is a nice animation from Jana Beck to illustrate it ([source](https://multithreaded.stitchfix.com/blog/2020/08/05/bandits/)). 
 
-<video width="640" height="360" controls>
-  <source src="assets/multi_armed_bandit.webm" type="video/webm">
-  Your browser does not support the video tag.
-</video>
+![Video as GIF](assets/multi_armed_bandit.gif)
